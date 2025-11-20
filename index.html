@@ -1,0 +1,169 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Christmas Santa Name Picker</title>
+<style>
+  body {
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(135deg, #001f3f, #003366);
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    margin: 0;
+    overflow: hidden;
+  }
+  h1 {
+    font-weight: bolder;
+    font-size: 2.5em;
+    margin-bottom: 20px;
+    text-shadow: 1px 1px 5px #000;
+  }
+  #message {
+    font-size: 1.8em;
+    font-weight: bold;
+    margin-bottom: 15px;
+    color: #ffffff; /* White */
+    transition: opacity 0.5s ease;
+  }
+  #pickBox {
+    cursor: pointer;
+    padding: 20px 60px;
+    font-size: 28px;
+    font-weight: bold;
+    border-radius: 50px;
+    box-shadow: 2px 2px 8px rgba(0,0,0,0.4);
+    user-select: none;
+    transition: background-color 0.3s, transform 0.2s, color 0.3s;
+    border: none;
+    outline: none;
+    background-color: #4caf50;
+    color: #fff; /* White text inside button */
+    min-width: 320px;
+  }
+  #pickBox:hover:not(.disabled):not(.rolling) {
+    background-color: #45a049;
+    transform: scale(1.05);
+  }
+  #pickBox.disabled {
+    background-color: #444;
+    cursor: not-allowed;
+    transform: none !important;
+  }
+  /* Snowflake styles */
+  @keyframes snowflake-fall {
+    0% { transform: translateY(-10px); opacity: 1; }
+    100% { transform: translateY(100vh); opacity: 0; }
+  }
+  .snowflake {
+    position: fixed;
+    top: -10px;
+    color: white;
+    font-size: 1.2em;
+    animation: snowflake-fall linear forwards;
+  }
+</style>
+</head>
+<body>
+
+<h1>🎅 Christmas Santa 🎄</h1>
+<div id="message">Your child is</div>
+<button id="pickBox">Find Your Child</button>
+
+<script>
+const names = [
+  "Keerthy", "Manisha", "Lindsa", "Abhishek", "Akhilesh", "Gopi",
+  "Pavan", "Santosh", "Guru", "Balaji", "Vedant", "Kaushal"
+];
+
+let remainingNames = [...names];
+const pickBox = document.getElementById("pickBox");
+const message = document.getElementById("message");
+
+let rollingInterval;
+const maxRolls = 20;
+let resetTimeout;
+
+function createSnowflake() {
+  const snowflake = document.createElement('div');
+  snowflake.className = 'snowflake';
+  snowflake.style.left = Math.random() * window.innerWidth + 'px';
+  snowflake.style.fontSize = 12 + Math.random() * 20 + 'px';
+  snowflake.style.animationDuration = 4 + Math.random() * 3 + 's';
+  snowflake.textContent = '❄';
+  document.body.appendChild(snowflake);
+  setTimeout(() => snowflake.remove(), 7000);
+}
+setInterval(createSnowflake, 300);
+
+function rollNames() {
+  if (remainingNames.length === 0) {
+    clearInterval(rollingInterval);
+    pickBox.classList.add("disabled");
+    pickBox.textContent = "All children have been paired! 🎉";
+    message.style.opacity = "0";
+    return;
+  }
+  const idx = Math.floor(Math.random() * names.length);
+  pickBox.textContent = names[idx];
+  pickBox.style.color = "#fff"; // White text while rolling
+}
+
+function pickName() {
+  if (remainingNames.length === 0) return;
+  const idx = Math.floor(Math.random() * remainingNames.length);
+  const picked = remainingNames.splice(idx, 1)[0];
+  pickBox.textContent = picked;
+  pickBox.style.color = "#fff"; // White text for picked name
+
+  // Animate scale
+  pickBox.style.transition = "transform 0.3s";
+  pickBox.style.transform = "scale(1.2)";
+  setTimeout(() => {
+    pickBox.style.transform = "scale(1)";
+  }, 300);
+
+  clearTimeout(resetTimeout);
+  resetTimeout = setTimeout(() => {
+    if (remainingNames.length > 0) {
+      pickBox.textContent = "Find Your Child";
+      pickBox.style.color = "#fff"; // Reset color (white)
+      message.style.opacity = "0"; // Hide message
+    }
+  }, 5000);
+
+  message.style.opacity = "1";
+}
+
+function startRolling() {
+  if (remainingNames.length === 0) {
+    pickBox.textContent = "All children have been paired! 🎉";
+    pickBox.classList.add("disabled");
+    message.style.opacity = "0";
+    return;
+  }
+  clearInterval(rollingInterval);
+  pickBox.classList.remove("disabled");
+  message.style.opacity = "1";
+  rollingInterval = setInterval(rollNames, 100);
+  setTimeout(() => {
+    clearInterval(rollingInterval);
+    pickName();
+  }, maxRolls * 100);
+}
+
+pickBox.addEventListener("click", () => {
+  if (!pickBox.classList.contains("disabled") && !pickBox.classList.contains("rolling")) {
+    startRolling();
+  }
+});
+</script>
+
+</body>
+</html>
